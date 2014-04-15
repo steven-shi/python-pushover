@@ -24,6 +24,7 @@ RECEIPT_URL = BASE_URL + "receipts/"
 
 SOUNDS = None
 TOKEN = None
+PROXIES = None
 
 def get_sounds():
     """Fetch and return a list of sounds (as a list of strings) recognized by
@@ -38,13 +39,15 @@ def get_sounds():
         SOUNDS = request.answer["sounds"]
     return SOUNDS
 
-def init(token, sound=False):
+def init(token, sound=False, proxies=None):
     """Initialize the module by setting the application token which will be
     used to send messages. If ``sound`` is ``True`` also returns the list of
     valid sounds by calling the :func:`get_sounds` function.
     """
     global TOKEN
     TOKEN = token
+    global PROXIES
+    PROXIES = proxies
     if sound:
         return get_sounds()
 
@@ -80,7 +83,7 @@ class Request:
             raise InitError
 
         payload["token"] = TOKEN
-        request = getattr(requests, request_type)(url, params=payload)
+        request = getattr(requests, request_type)(url, params=payload, proxies=PROXIES)
         self.answer = request.json()
         if 400 <= request.status_code < 500:
             raise RequestError(self.answer["errors"])
